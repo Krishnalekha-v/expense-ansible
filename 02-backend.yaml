@@ -1,0 +1,61 @@
+- name: conigure backend server
+  hosts: backend
+  become: yes
+  tasks:
+  - name: disable detault nodejs -y
+    ansible.builtin.command: dnf module disable nodejs
+  
+  - name: enable detault node js
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+  - name: install nodejs
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - nodejs
+    - mysql
+
+  - name: create expense user
+    ansible.builtin.user:
+      name: Expense
+  
+  - name: create app directory
+    ansible.builtin.file:
+      name: /app
+      state: directory
+
+  - name: download the backend code
+    ansible.builtin.get_url:
+      url: https://expense-builds.s.us-east-1.amazoneaws.com/expense-backend-v2.zip
+      dest: /tmp/backend.zip
+
+  - name: extract the code
+    ansible.builtin.unarchive:
+      src: /tmp/backend.zip
+      dest: /app
+      remote_src: yes
+  - name: install dependencies
+    ansible.builti.command: npm install
+    args:
+      chdir: /app
+
+  - name: copy backend service
+    ansible.builtin.copy:
+      src: backend.service
+      dest: /etc/systemd/system/backend.service
+
+  - name: ansible to install pymysql
+    ansible.builtin.pip:
+      name: 
+      - PyMySQL
+      executable: pip3.9
+
+  - name: import mysql data
+    community.mysql.mysql_info:
+      login_user: mysql_root_password
+      login_password: "{{ mysql_root_password }}"
+      login_host: "{{ login_host }}"
+      target: /app/schema/backend.sql 
+      name: all
+      state: dump
