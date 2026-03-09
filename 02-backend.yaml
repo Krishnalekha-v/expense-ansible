@@ -1,6 +1,9 @@
 - name: conigure backend server
   hosts: backend
   become: yes
+  vars:
+    mysql_root_password: ExpenseApp@1
+    login_host: mysql.devopsp.online
   tasks:
   - name: disable detault nodejs -y
     ansible.builtin.command: dnf module disable nodejs
