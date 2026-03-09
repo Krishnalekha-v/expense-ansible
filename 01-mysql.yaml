@@ -1,6 +1,6 @@
 - name: mysql coniguration
   hosts: mysql
-  task:
+  tasks:
   - name: install mysql
     ansible.builtin.package:
     name: mysql-server
